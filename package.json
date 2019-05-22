@@ -1,0 +1,21 @@
+{
+  "name": "promise_a",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build:js": "rollup --config rollup.config.js",
+    "test:js": "npm run build:js && promises-aplus-tests dist/promiseA+_js.js --grep 2.3.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.4",
+    "@babel/preset-env": "^7.4.4",
+    "promises-aplus-tests": "^2.1.2",
+    "rollup": "^1.12.3",
+    "rollup-plugin-babel": "^4.3.2"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.4.4",
+    "core-js": "3"
+  }
+}
