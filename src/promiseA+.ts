@@ -1,64 +1,73 @@
 class MyPromise {
-  constructor(fn) {
+  private resolvedCalls: Array<Function>;
+  private rejectedCalls: Array<Function>;
+  private resolve: ResolveFn<any>;
+  private reject: RejectFn<any>;
+
+  public status: MyPromiseStatus;
+  public value: any;
+
+  constructor(fn: MyPromiseFn<any>) {
     this.status = 'pending';
     this.value = '';
-    this.resolvedCall = [];
-    this.rejectedCall = [];
+    this.resolvedCalls = [];
+    this.rejectedCalls = [];
+
+    this.resolve = value => {
+      if (value instanceof MyPromise) {
+        return value.then(this.resolve, this.reject);
+      }
+      setTimeout(() => {
+        if (this.status === 'pending') {
+          this.status = 'resolved';
+          this.value = value;
+          this.resolvedCalls.forEach(v => v());
+        }
+      });
+      return undefined;
+    };
+
+    this.reject = reason => {
+      setTimeout(() => {
+        if (this.status === 'pending') {
+          this.status = 'rejected';
+          this.value = reason;
+          this.rejectedCalls.forEach(v => v());
+        }
+      });
+    };
 
     try {
-      fn(this.resolve.bind(this), this.reject.bind(this));
+      fn(this.resolve, this.reject);
     } catch (error) {
       this.reject(error);
     }
   }
 
-  resolve(value) {
-    if (value instanceof MyPromise) {
-      return value.then(this.resolve.bind(this), this.reject.bind(this));
-    }
-    setTimeout(() => {
-      if (this.status === 'pending') {
-        this.status = 'resolved';
-        this.value = value;
-        this.resolvedCall.forEach(v => v());
-      }
-    });
-  }
-
-  reject(reason) {
-    setTimeout(() => {
-      if (this.status === 'pending') {
-        this.status = 'rejected';
-        this.value = reason;
-        this.rejectedCall.forEach(v => v());
-      }
-    });
-  }
-
-  then(resolvedFn, rejectedFn) {
-    let promise2;
-    resolvedFn = typeof resolvedFn === 'function' ? resolvedFn : v => v;
+  then(resolvedFn: any, rejectedFn: any) {
+    let promise2: MyPromise = new MyPromise(() => {});
+    resolvedFn = typeof resolvedFn === 'function' ? resolvedFn : (v: any) => v;
     rejectedFn =
       typeof rejectedFn === 'function'
         ? rejectedFn
-        : v => {
-            throw v;
+        : (e: any) => {
+            throw e;
           };
     switch (this.status) {
       case 'pending':
         promise2 = new MyPromise((resolve, reject) => {
-          this.resolvedCall.push(() => {
+          this.resolvedCalls.push(() => {
             try {
               const res = resolvedFn(this.value);
-              this.handlerPromise(promise2, res, resolve, reject);
+              this.hanlderPromise(promise2, res, resolve, reject);
             } catch (error) {
               reject(error);
             }
           });
-          this.rejectedCall.push(() => {
+          this.rejectedCalls.push(() => {
             try {
               const res = rejectedFn(this.value);
-              this.handlerPromise(promise2, res, resolve, reject);
+              this.hanlderPromise(promise2, res, resolve, reject);
             } catch (error) {
               reject(error);
             }
@@ -70,7 +79,7 @@ class MyPromise {
           setTimeout(() => {
             try {
               const res = resolvedFn(this.value);
-              this.handlerPromise(promise2, res, resolve, reject);
+              this.hanlderPromise(promise2, res, resolve, reject);
             } catch (error) {
               reject(error);
             }
@@ -82,7 +91,7 @@ class MyPromise {
           setTimeout(() => {
             try {
               const res = rejectedFn(this.value);
-              this.handlerPromise(promise2, res, resolve, reject);
+              this.hanlderPromise(promise2, res, resolve, reject);
             } catch (error) {
               reject(error);
             }
@@ -93,38 +102,43 @@ class MyPromise {
     return promise2;
   }
 
-  handlerPromise(pre, cur, resolve, reject) {
+  hanlderPromise(
+    pre: MyPromise,
+    cur: any,
+    resolve: ResolveFn<any>,
+    reject: RejectFn<any>
+  ) {
     if (pre === cur) {
       return reject(new TypeError('Error'));
     }
     if (cur instanceof MyPromise) {
       if (cur.status === 'pending') {
-        cur.then(value => {
-          this.handlerPromise(pre, value, resolve, reject);
-        }, reject);
+        cur.then(
+          (value: any) => this.hanlderPromise(pre, value, resolve, reject),
+          reject
+        );
       } else {
         cur.then(resolve, reject);
       }
       return;
     }
 
-    let called;
-
+    let called = false;
     if (
       cur !== null &&
-      (typeof cur === 'object' || typeof cur === 'function')
+      (typeof cur === 'function' || typeof cur === 'object')
     ) {
       try {
-        let then = cur.then;
+        let then: any = cur.then;
         if (typeof then === 'function') {
           then.call(
             cur,
-            value => {
+            (value: any) => {
               if (called) return;
               called = true;
-              this.handlerPromise(pre, value, resolve, reject);
+              this.hanlderPromise(pre, value, resolve, reject);
             },
-            e => {
+            (e: any) => {
               if (called) return;
               called = true;
               reject(e);
@@ -133,10 +147,10 @@ class MyPromise {
         } else {
           resolve(cur);
         }
-      } catch (e) {
+      } catch (error) {
         if (called) return;
         called = true;
-        reject(e);
+        reject(error);
       }
     } else {
       resolve(cur);
@@ -146,24 +160,24 @@ class MyPromise {
 
 export default {
   MyPromise,
-  resolved(value) {
+  resolved(value?: any) {
     return new MyPromise(resolve => resolve(value));
   },
-  rejected(reason) {
+  rejected(reason?: any) {
     return new MyPromise((resolve, reject) => reject(reason));
   },
   deferred() {
-    let resolve, reject;
+    let resolve: ResolveFn<any>, reject: RejectFn<any>;
     const p = new MyPromise((_resolve, _reject) => {
       resolve = _resolve;
       reject = _reject;
     });
     return {
       promise: p,
-      resolve(value) {
+      resolve(value: any) {
         resolve(value);
       },
-      reject(value) {
+      reject(value: any) {
         reject(value);
       }
     };

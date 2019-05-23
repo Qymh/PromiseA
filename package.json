@@ -1,18 +1,24 @@
 {
   "name": "promise_a",
   "version": "1.0.0",
-  "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build:js": "rollup --config rollup.config.js",
-    "test:js": "npm run build:js && promises-aplus-tests dist/promiseA+_js.js"
+    "build:js": "rollup --config rollup/rollup.config.js",
+    "build:ts": "rollup --config rollup/rollup.config.ts",
+    "test:js": "npm run build:js && promises-aplus-tests dist/promiseA+_js.js",
+    "test:ts": "npm run build:ts && promises-aplus-tests dist/promiseA+_ts.js",
+    "build": "npm run build:js && npm run build:ts",
+    "test": "npm run test:js && npm run test:ts"
   },
   "devDependencies": {
     "@babel/core": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
     "promises-aplus-tests": "^2.1.2",
     "rollup": "^1.12.3",
-    "rollup-plugin-babel": "^4.3.2"
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-typescript": "^1.0.1",
+    "tslib": "^1.9.3",
+    "typescript": "^3.4.5"
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.4",

@@ -179,31 +179,29 @@
   var promiseA_ = {
     MyPromise: MyPromise,
     resolved: function resolved(value) {
-      var p = new MyPromise(function (resolve) {
-        resolve.call(p, value);
+      return new MyPromise(function (resolve) {
+        return resolve(value);
       });
-      return p;
     },
-    rejected: function rejected(value) {
-      var p = new MyPromise(function (resolve, reject) {
-        reject.call(p, value);
+    rejected: function rejected(reason) {
+      return new MyPromise(function (resolve, reject) {
+        return reject(reason);
       });
-      return p;
     },
     deferred: function deferred() {
       var _resolve2, _reject2;
 
-      var a = new MyPromise(function (_resolve, _reject) {
-        _resolve2 = _resolve.bind(a);
-        _reject2 = _reject.bind(a);
+      var p = new MyPromise(function (_resolve, _reject) {
+        _resolve2 = _resolve;
+        _reject2 = _reject;
       });
       return {
-        promise: a,
+        promise: p,
         resolve: function resolve(value) {
-          return _resolve2(value);
+          _resolve2(value);
         },
         reject: function reject(value) {
-          return _reject2(value);
+          _reject2(value);
         }
       };
     }
