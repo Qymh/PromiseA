@@ -26,7 +26,7 @@
       var _this = this;
 
       if (value instanceof MyPromise) {
-        return value.then(this.resolve, this.reject);
+        return value.then(this.resolve.bind(this), this.reject.bind(this));
       }
 
       setTimeout(function () {

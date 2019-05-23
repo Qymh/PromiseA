@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build:js": "rollup --config rollup.config.js",
-    "test:js": "npm run build:js && promises-aplus-tests dist/promiseA+_js.js --grep 2.3.3"
+    "test:js": "npm run build:js && promises-aplus-tests dist/promiseA+_js.js"
   },
   "devDependencies": {
     "@babel/core": "^7.4.4",
