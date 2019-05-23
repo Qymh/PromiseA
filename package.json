@@ -2,6 +2,10 @@
   "name": "promise_a",
   "version": "1.0.0",
   "license": "MIT",
+  "author": {
+    "name": "Qymh",
+    "email": "bowei.zhang@ankerbox.com"
+  },
   "scripts": {
     "build:js": "rollup --config rollup/rollup.config.js",
     "build:ts": "rollup --config rollup/rollup.config.ts",
